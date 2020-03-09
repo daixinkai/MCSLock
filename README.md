@@ -1,6 +1,6 @@
 # MCSLock
 
-*MCSLock
+*MCSLock*
 
 # Usage
 
