@@ -12,11 +12,19 @@ namespace System.Threading
             public int Index { get; internal set; }
             public Node Next { get; internal set; }
             public bool IsLocked { get; internal set; }
+            internal string LockKey { get; set; }
+        }
+
+        public MCSLock()
+        {
+            _key = Guid.NewGuid().ToString();
         }
 
         Node _queue;
 
         int _index;
+
+        string _key;
 
         public int DelayMs { get; set; }
 
@@ -25,7 +33,8 @@ namespace System.Threading
             Interlocked.Increment(ref _index);
             return new Node()
             {
-                Index = _index
+                Index = _index,
+                LockKey = _key
             };
         }
 
@@ -56,6 +65,14 @@ namespace System.Threading
 
         public void Unlock(Node node)
         {
+            if (node == null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+            if (!_key.Equals(node.LockKey))
+            {
+                throw new ArgumentException();
+            }
             if (node.Next == null)
             {
                 if (Interlocked.CompareExchange(ref _queue, null, node) == node)
